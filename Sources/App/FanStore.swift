@@ -16,12 +16,12 @@ enum ControlMode: String, CaseIterable, Identifiable {
 
     var title: LocalizedStringKey {
         switch self {
-        case .auto: return "Авто"
-        case .quiet: return "Тихий"
-        case .balanced: return "Баланс"
-        case .performance: return "Нагрузка"
-        case .full: return "Максимум"
-        case .custom: return "Вручную"
+        case .auto: return LocalizedStringKey(AppLanguage.localized("Авто"))
+        case .quiet: return LocalizedStringKey(AppLanguage.localized("Тихий"))
+        case .balanced: return LocalizedStringKey(AppLanguage.localized("Баланс"))
+        case .performance: return LocalizedStringKey(AppLanguage.localized("Нагрузка"))
+        case .full: return LocalizedStringKey(AppLanguage.localized("Максимум"))
+        case .custom: return LocalizedStringKey(AppLanguage.localized("Вручную"))
         }
     }
 
@@ -44,7 +44,7 @@ final class FanStore: ObservableObject {
     @Published var customRPM: Double = 2000
     @Published var helperInstalled = false
     @Published var helperError: String?
-    @Published var lastApplied: String = String(localized: "System")
+    @Published var lastApplied: String = AppLanguage.localized("System")
     @Published var installing = false
 
     private let smc = SMCClient()
@@ -59,7 +59,7 @@ final class FanStore: ObservableObject {
         helperInstalled = FileManager.default.isExecutableFile(atPath: FanHardware.helperInstallPath)
         refresh()
         customRPM = snapshot.targetRPM == 0 ? snapshot.minRPM : snapshot.targetRPM
-        timer = Timer.publish(every: 1.0, on: .main, in: .common)
+        timer = Timer.publish(every: 3.0, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in self?.tick() }
 

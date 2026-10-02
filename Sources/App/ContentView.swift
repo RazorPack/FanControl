@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject private var store: FanStore
+    @AppStorage("appLanguage") private var selectedLanguage = AppLanguage.system.rawValue
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
@@ -10,12 +11,18 @@ struct ContentView: View {
             modes
             slider
             temperatures
+            languageSettings
             helperBar
             safetyNote
         }
         .padding(22)
         .frame(width: 440)
         .background(.ultraThinMaterial)
+        .onChange(of: selectedLanguage) { _, newValue in
+            if let language = AppLanguage(rawValue: newValue) {
+                AppLanguage.apply(language)
+            }
+        }
     }
 
     private var header: some View {
@@ -33,14 +40,14 @@ struct ContentView: View {
     }
 
     private var machineLine: String {
-        let model = store.snapshot.model.isEmpty ? String(localized: "Mac") : store.snapshot.model
-        let chip = store.snapshot.chip.isEmpty ? String(localized: "Apple Silicon") : store.snapshot.chip
+        let model = store.snapshot.model.isEmpty ? AppLanguage.localized("Mac") : store.snapshot.model
+        let chip = store.snapshot.chip.isEmpty ? AppLanguage.localized("Apple Silicon") : store.snapshot.chip
         return "\(chip) · \(model)"
     }
 
     private var statusChip: some View {
         let auto = store.mode == .auto
-        return Text(auto ? "macOS" : "ручной")
+        return Text(auto ? "macOS" : AppLanguage.localized("ручной"))
             .font(.caption.weight(.semibold))
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
@@ -65,7 +72,7 @@ struct ContentView: View {
                     Text("\(store.snapshot.displayRPM)")
                         .font(.system(size: 36, weight: .semibold, design: .rounded))
                         .monospacedDigit()
-                    Text("RPM")
+                    Text(AppLanguage.localized("RPM"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -73,16 +80,16 @@ struct ContentView: View {
             .frame(width: 168, height: 168)
 
             VStack(alignment: .leading, spacing: 10) {
-                metric("Цель", "\(Int(store.snapshot.targetRPM.rounded()))")
-                metric("Диапазон", "\(Int(store.snapshot.minRPM))–\(Int(store.snapshot.maxRPM))")
-                metric("Режим SMC", modeLabel(store.snapshot.mode))
-                metric("Тепло", thermalLabel)
+                metric(AppLanguage.localized("Цель"), "\(Int(store.snapshot.targetRPM.rounded()))")
+                metric(AppLanguage.localized("Диапазон"), "\(Int(store.snapshot.minRPM))–\(Int(store.snapshot.maxRPM))")
+                metric(AppLanguage.localized("Режим SMC"), modeLabel(store.snapshot.mode))
+                metric(AppLanguage.localized("Тепло"), thermalLabel)
             }
             Spacer()
         }
     }
 
-    private func metric(_ title: LocalizedStringKey, _ value: LocalizedStringKey) -> some View {
+    private func metric(_ title: String, _ value: String) -> some View {
         VStack(alignment: .leading, spacing: 1) {
             Text(title)
                 .font(.caption2)
@@ -93,28 +100,28 @@ struct ContentView: View {
         }
     }
 
-    private var thermalLabel: LocalizedStringKey {
+    private var thermalLabel: String {
         switch ProcessInfo.processInfo.thermalState {
-        case .nominal: return "норма"
-        case .fair: return "тепло"
-        case .serious: return "жарко"
-        case .critical: return "критично"
+        case .nominal: return AppLanguage.localized("норма")
+        case .fair: return AppLanguage.localized("тепло")
+        case .serious: return AppLanguage.localized("жарко")
+        case .critical: return AppLanguage.localized("критично")
         @unknown default: return "—"
         }
     }
 
-    private func modeLabel(_ mode: Int) -> LocalizedStringKey {
+    private func modeLabel(_ mode: Int) -> String {
         switch mode {
-        case 0: return "авто (0)"
-        case 1: return "ручной (1)"
-        case 3: return "система (3)"
+        case 0: return AppLanguage.localized("авто (0)")
+        case 1: return AppLanguage.localized("ручной (1)")
+        case 3: return AppLanguage.localized("система (3)")
         default: return "\(mode)"
         }
     }
 
     private var modes: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Профили")
+            Text(AppLanguage.localized("Профили"))
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
@@ -139,14 +146,14 @@ struct ContentView: View {
     private var slider: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Text("Целевые обороты")
+                Text(AppLanguage.localized("Целевые обороты"))
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
                 Spacer()
                 HStack(spacing: 4) {
                     Text("\(Int(store.customRPM.rounded()))")
                         .font(.caption.monospacedDigit())
-                    Text("RPM")
+                    Text(AppLanguage.localized("RPM"))
                         .font(.caption)
                 }
             }
@@ -159,6 +166,28 @@ struct ContentView: View {
                 step: 50
             )
             .disabled(!store.helperInstalled && store.mode != .auto)
+        }
+    }
+
+    private var languageSettings: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(AppLanguage.localized("Язык"))
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+            Picker(AppLanguage.localized("Язык"), selection: Binding(
+                get: { selectedLanguage },
+                set: { newValue in
+                    selectedLanguage = newValue
+                    if let language = AppLanguage(rawValue: newValue) {
+                        AppLanguage.apply(language)
+                    }
+                }
+            )) {
+                ForEach(AppLanguage.allCases, id: \ .id) { language in
+                    Text(language.displayName).tag(language.rawValue)
+                }
+            }
+            .pickerStyle(.segmented)
         }
     }
 
@@ -195,26 +224,26 @@ struct ContentView: View {
     private var helperBar: some View {
         Group {
             if store.snapshot.helper {
-                Label("Фоновый сервис активен · \(store.lastApplied)", systemImage: "checkmark.shield")
+                Label(AppLanguage.localized("Фоновый сервис активен · %@").replacingOccurrences(of: "%@", with: store.lastApplied), systemImage: "checkmark.shield")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else if store.helperInstalled {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Сервис установлен, но сейчас не отвечает. Запустите его снова паролем администратора.")
+                    Text(AppLanguage.localized("Сервис установлен, но сейчас не отвечает. Запустите его снова паролем администратора."))
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Button("Перезапустить сервис") { store.installHelper() }
+                    Button(AppLanguage.localized("Перезапустить сервис")) { store.installHelper() }
                         .disabled(store.installing)
                 }
             } else {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Чтение датчиков уже работает. Для ручного управления вентилятором нужен одноразовый пароль администратора — SMC принимает запись оборотов только от root.")
+                    Text(AppLanguage.localized("Чтение датчиков уже работает. Для ручного управления вентилятором нужен одноразовый пароль администратора — SMC принимает запись оборотов только от root."))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Button {
                         store.installHelper()
                     } label: {
-                        Text(store.installing ? "Установка…" : "Разрешить управление вентилятором")
+                        Text(store.installing ? AppLanguage.localized("Установка…") : AppLanguage.localized("Разрешить управление вентилятором"))
                     }
                     .disabled(store.installing)
                     .keyboardShortcut("e", modifiers: [.command])
@@ -230,7 +259,7 @@ struct ContentView: View {
                     .font(.caption)
                     .foregroundStyle(.red)
             }
-            Text("Не удерживайте минимум при высокой температуре. При CPU ≥ 95 °C приложение поднимает обороты и при выходе возвращает управление macOS.")
+            Text(AppLanguage.localized("Не удерживайте минимум при высокой температуре. При CPU ≥ 95 °C приложение поднимает обороты и при выходе возвращает управление macOS."))
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
         }

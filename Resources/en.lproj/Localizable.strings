@@ -33,6 +33,8 @@
 "Не удерживайте минимум при высокой температуре. При CPU ≥ 95 °C приложение поднимает обороты и при выходе возвращает управление macOS." = "Do not keep the fan at minimum speed when temperatures are high. At CPU ≥ 95°C, the app raises fan speed and restores macOS control when it quits.";
 "Разрешить управление…" = "Allow control…";
 "Открыть MacFanControl" = "Open MacFanControl";
+"Свернуть в строку меню" = "Hide to menu bar";
+"Язык" = "Language";
 "Выйти" = "Quit";
 "A background service with administrator privileges is required." = "A background service with administrator privileges is required.";
 "Could not communicate with the background service." = "Could not communicate with the background service.";

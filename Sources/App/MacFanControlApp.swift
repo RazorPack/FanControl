@@ -4,7 +4,12 @@ import SwiftUI
 @main
 struct MacFanControlApp: App {
     @StateObject private var store = FanStore()
+    @AppStorage("appLanguage") private var selectedLanguage = AppLanguage.system.rawValue
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+
+    init() {
+        AppLanguage.apply(AppLanguage.current)
+    }
 
     var body: some Scene {
         Window("MacFanControl", id: "main") {
@@ -14,19 +19,24 @@ struct MacFanControlApp: App {
                     store.start()
                     appDelegate.store = store
                 }
+                .onChange(of: selectedLanguage) { _, newValue in
+                    if let language = AppLanguage(rawValue: newValue) {
+                        AppLanguage.apply(language)
+                    }
+                }
         }
         .windowResizability(.contentSize)
         .defaultSize(width: 440, height: 620)
         .commands {
             CommandGroup(replacing: .newItem) {}
-            CommandMenu("Вентилятор") {
-                Button("Авто") { store.select(.auto) }
-                Button("Тихий") { store.select(.quiet) }
-                Button("Баланс") { store.select(.balanced) }
-                Button("Нагрузка") { store.select(.performance) }
-                Button("Максимум") { store.select(.full) }
+            CommandMenu(AppLanguage.localized("Вентилятор")) {
+                Button(AppLanguage.localized("Авто")) { store.select(.auto) }
+                Button(AppLanguage.localized("Тихий")) { store.select(.quiet) }
+                Button(AppLanguage.localized("Баланс")) { store.select(.balanced) }
+                Button(AppLanguage.localized("Нагрузка")) { store.select(.performance) }
+                Button(AppLanguage.localized("Максимум")) { store.select(.full) }
                 Divider()
-                Button("Разрешить управление…") { store.installHelper() }
+                Button(AppLanguage.localized("Разрешить управление…")) { store.installHelper() }
                     .keyboardShortcut("e", modifiers: [.command])
             }
         }
@@ -36,7 +46,7 @@ struct MacFanControlApp: App {
                 HStack(spacing: 4) {
                     Text("\(store.snapshot.displayRPM)")
                         .font(.headline.monospacedDigit())
-                    Text("RPM")
+                    Text(AppLanguage.localized("RPM"))
                         .font(.headline)
                 }
                 if let cpu = store.snapshot.cpuTemp {
@@ -48,19 +58,22 @@ struct MacFanControlApp: App {
                         .foregroundStyle(.secondary)
                 }
                 Divider()
-                Button("Авто") { store.select(.auto) }
-                Button("Тихий") { store.select(.quiet) }
-                Button("Баланс") { store.select(.balanced) }
-                Button("Нагрузка") { store.select(.performance) }
-                Button("Максимум") { store.select(.full) }
+                Button(AppLanguage.localized("Авто")) { store.select(.auto) }
+                Button(AppLanguage.localized("Тихий")) { store.select(.quiet) }
+                Button(AppLanguage.localized("Баланс")) { store.select(.balanced) }
+                Button(AppLanguage.localized("Нагрузка")) { store.select(.performance) }
+                Button(AppLanguage.localized("Максимум")) { store.select(.full) }
                 Divider()
-                Button("Открыть MacFanControl") {
+                Button(AppLanguage.localized("Свернуть в строку меню")) {
+                    NSApp.hide(nil)
+                }
+                Button(AppLanguage.localized("Открыть MacFanControl")) {
                     NSApp.activate(ignoringOtherApps: true)
                     if let window = NSApp.windows.first(where: { $0.identifier?.rawValue == "main" || $0.title == "MacFanControl" }) {
                         window.makeKeyAndOrderFront(nil)
                     }
                 }
-                Button("Выйти") {
+                Button(AppLanguage.localized("Выйти")) {
                     store.stop()
                     NSApp.terminate(nil)
                 }
@@ -80,6 +93,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         false
+    }
+
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows: Bool) -> Bool {
+        if !hasVisibleWindows {
+            if let window = NSApp.windows.first(where: { $0.identifier?.rawValue == "main" || $0.title == "MacFanControl" }) {
+                window.makeKeyAndOrderFront(nil)
+            }
+        }
+        return true
     }
 
     func applicationWillTerminate(_ notification: Notification) {
