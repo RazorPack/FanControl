@@ -43,46 +43,38 @@ struct MacFanControlApp: App {
         }
 
         MenuBarExtra {
-            VStack(alignment: .leading, spacing: 8) {
-                HStack(spacing: 4) {
-                    Text("\(store.snapshot.displayRPM)")
-                        .font(.headline.monospacedDigit())
-                    Text(AppLanguage.localized("RPM"))
-                        .font(.headline)
-                }
-                if let cpu = store.snapshot.cpuTemp {
-                    HStack(spacing: 4) {
-                        Text("CPU")
-                        Text(String(format: "%.0f°C", cpu))
+            Text("\(store.snapshot.displayRPM) \(AppLanguage.localized("RPM"))")
+            if let cpu = store.snapshot.cpuTemp {
+                Text("CPU \(String(format: "%.0f°C", cpu))")
+            }
+            Divider()
+            ForEach(ControlMode.allCases.filter { $0 != .custom }) { mode in
+                Button {
+                    store.select(mode)
+                } label: {
+                    if store.mode == mode {
+                        Label(mode.title, systemImage: "checkmark")
+                    } else {
+                        Text(verbatim: mode.title)
                     }
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                Divider()
-                Button(AppLanguage.localized("Авто")) { store.select(.auto) }
-                Button(AppLanguage.localized("Тихий")) { store.select(.quiet) }
-                Button(AppLanguage.localized("Баланс")) { store.select(.balanced) }
-                Button(AppLanguage.localized("Нагрузка")) { store.select(.performance) }
-                Button(AppLanguage.localized("Максимум")) { store.select(.full) }
-                Divider()
-                Button(AppLanguage.localized("Свернуть в строку меню")) {
-                    appDelegate.hideMainWindow()
-                }
-                Button(AppLanguage.localized("Открыть MacFanControl")) {
-                    appDelegate.showMainWindow()
-                }
-                Button(AppLanguage.localized("Выйти")) {
-                    store.stop()
-                    NSApp.terminate(nil)
                 }
             }
-            .padding(8)
-            .environmentObject(store)
+            Divider()
+            Button(AppLanguage.localized("Свернуть в строку меню")) {
+                    appDelegate.hideMainWindow()
+            }
+            Button(AppLanguage.localized("Открыть MacFanControl")) {
+                appDelegate.showMainWindow()
+            }
+            Button(AppLanguage.localized("Выйти")) {
+                store.stop()
+                NSApp.terminate(nil)
+            }
         } label: {
             MenuBarLabel()
                 .environmentObject(store)
         }
-        .menuBarExtraStyle(.window)
+        .menuBarExtraStyle(.menu)
 
         Settings {
             SettingsView()
