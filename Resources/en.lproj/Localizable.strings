@@ -35,6 +35,10 @@
 "Открыть MacFanControl" = "Open MacFanControl";
 "Свернуть в строку меню" = "Hide to menu bar";
 "Язык" = "Language";
+"Язык приложения" = "Application language";
+"Язык применяется сразу ко всему интерфейсу." = "The language applies immediately throughout the interface.";
+"Как в macOS" = "Use macOS language";
+"Автоматически" = "Automatic";
 "Выйти" = "Quit";
 "A background service with administrator privileges is required." = "A background service with administrator privileges is required.";
 "Could not communicate with the background service." = "Could not communicate with the background service.";

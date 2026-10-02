@@ -25,7 +25,7 @@ icon:
 app: helper icon
 	mkdir -p $(APP)/Contents/MacOS $(APP)/Contents/Helpers $(APP)/Contents/Resources
 	$(SWIFTC) $(CFLAGS) -framework SwiftUI -framework AppKit -framework IOKit -framework Foundation \
-		$(SHARED) Sources/App/AppLanguage.swift Sources/App/MacFanControlApp.swift Sources/App/FanStore.swift Sources/App/ContentView.swift \
+		$(SHARED) Sources/App/AppLanguage.swift Sources/App/SettingsView.swift Sources/App/MacFanControlApp.swift Sources/App/FanStore.swift Sources/App/ContentView.swift \
 		-o $(APP)/Contents/MacOS/MacFanControl
 	cp Resources/Info.plist $(APP)/Contents/Info.plist
 	cp build/MacFanControl.icns $(APP)/Contents/Resources/MacFanControl.icns

@@ -14,14 +14,14 @@ enum ControlMode: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var title: LocalizedStringKey {
+    var title: String {
         switch self {
-        case .auto: return LocalizedStringKey(AppLanguage.localized("Авто"))
-        case .quiet: return LocalizedStringKey(AppLanguage.localized("Тихий"))
-        case .balanced: return LocalizedStringKey(AppLanguage.localized("Баланс"))
-        case .performance: return LocalizedStringKey(AppLanguage.localized("Нагрузка"))
-        case .full: return LocalizedStringKey(AppLanguage.localized("Максимум"))
-        case .custom: return LocalizedStringKey(AppLanguage.localized("Вручную"))
+        case .auto: return AppLanguage.localized("Авто")
+        case .quiet: return AppLanguage.localized("Тихий")
+        case .balanced: return AppLanguage.localized("Баланс")
+        case .performance: return AppLanguage.localized("Нагрузка")
+        case .full: return AppLanguage.localized("Максимум")
+        case .custom: return AppLanguage.localized("Вручную")
         }
     }
 
@@ -150,11 +150,11 @@ final class FanStore: ObservableObject {
     private func apply() {
         guard mode != .auto else {
             if helperInstalled { _ = send(.auto) }
-            lastApplied = String(localized: "System")
+            lastApplied = AppLanguage.localized("System")
             return
         }
         guard helperInstalled else {
-            helperError = String(localized: "A background service with administrator privileges is required.")
+            helperError = AppLanguage.localized("A background service with administrator privileges is required.")
             return
         }
         let rpm: Double
@@ -168,10 +168,10 @@ final class FanStore: ObservableObject {
             )
         }
         if send(.set, rpm: rpm) != nil {
-            lastApplied = String(format: NSLocalizedString("%d RPM", comment: "Fan speed"), Int(rpm.rounded()))
+            lastApplied = String(format: AppLanguage.localized("%d RPM"), Int(rpm.rounded()))
             helperError = nil
         } else {
-            helperError = String(localized: "Could not communicate with the background service.")
+            helperError = AppLanguage.localized("Could not communicate with the background service.")
         }
     }
 
@@ -252,7 +252,7 @@ enum HelperInstaller {
         let helperSrc = Bundle.main.bundlePath + "/Contents/Helpers/macfancontrol-helper"
         guard FileManager.default.isExecutableFile(atPath: helperSrc) else {
             return .failure(NSError(domain: "MacFanControl", code: 1, userInfo: [
-                NSLocalizedDescriptionKey: String(localized: "The helper executable was not found in the app.")
+                NSLocalizedDescriptionKey: AppLanguage.localized("The helper executable was not found in the app.")
             ]))
         }
 
@@ -315,7 +315,7 @@ enum HelperInstaller {
             if process.terminationStatus == 0 {
                 return .success(())
             }
-            let message = String(data: err.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? String(localized: "Installation error")
+            let message = String(data: err.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? AppLanguage.localized("Installation error")
             return .failure(NSError(domain: "MacFanControl", code: Int(process.terminationStatus), userInfo: [
                 NSLocalizedDescriptionKey: message
             ]))

@@ -18,6 +18,7 @@ struct MacFanControlApp: App {
                 .onAppear {
                     store.start()
                     appDelegate.store = store
+                    appDelegate.attachMainWindow()
                 }
                 .onChange(of: selectedLanguage) { _, newValue in
                     if let language = AppLanguage(rawValue: newValue) {
@@ -68,10 +69,7 @@ struct MacFanControlApp: App {
                     NSApp.hide(nil)
                 }
                 Button(AppLanguage.localized("Открыть MacFanControl")) {
-                    NSApp.activate(ignoringOtherApps: true)
-                    if let window = NSApp.windows.first(where: { $0.identifier?.rawValue == "main" || $0.title == "MacFanControl" }) {
-                        window.makeKeyAndOrderFront(nil)
-                    }
+                    appDelegate.showMainWindow()
                 }
                 Button(AppLanguage.localized("Выйти")) {
                     store.stop()
@@ -85,23 +83,51 @@ struct MacFanControlApp: App {
                 .environmentObject(store)
         }
         .menuBarExtraStyle(.window)
+
+        Settings {
+            SettingsView()
+        }
     }
 }
 
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var store: FanStore?
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         false
     }
 
+    func attachMainWindow() {
+        DispatchQueue.main.async { [weak self] in
+            self?.mainWindow?.delegate = self
+        }
+    }
+
+    func windowShouldClose(_ sender: NSWindow) -> Bool {
+        guard isMainWindow(sender) else { return true }
+        NSApp.hide(nil)
+        return false
+    }
+
+    func showMainWindow() {
+        NSApp.unhide(nil)
+        NSApp.activate(ignoringOtherApps: true)
+        mainWindow?.makeKeyAndOrderFront(nil)
+    }
+
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows: Bool) -> Bool {
         if !hasVisibleWindows {
-            if let window = NSApp.windows.first(where: { $0.identifier?.rawValue == "main" || $0.title == "MacFanControl" }) {
-                window.makeKeyAndOrderFront(nil)
-            }
+            showMainWindow()
         }
         return true
+    }
+
+    private var mainWindow: NSWindow? {
+        NSApp.windows.first(where: isMainWindow)
+    }
+
+    private func isMainWindow(_ window: NSWindow) -> Bool {
+        window.identifier?.rawValue == "main" || window.title == "MacFanControl"
     }
 
     func applicationWillTerminate(_ notification: Notification) {

@@ -11,7 +11,6 @@ struct ContentView: View {
             modes
             slider
             temperatures
-            languageSettings
             helperBar
             safetyNote
         }
@@ -47,7 +46,7 @@ struct ContentView: View {
 
     private var statusChip: some View {
         let auto = store.mode == .auto
-        return Text(auto ? "macOS" : AppLanguage.localized("ручной"))
+        return Text(auto ? AppLanguage.localized("Автоматически") : AppLanguage.localized("ручной"))
             .font(.caption.weight(.semibold))
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
@@ -126,7 +125,9 @@ struct ContentView: View {
                 .foregroundStyle(.secondary)
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
                 ForEach(ControlMode.allCases.filter { $0 != .custom }) { mode in
-                    Button(mode.title) { store.select(mode) }
+                    Button { store.select(mode) } label: {
+                        Text(verbatim: mode.title)
+                    }
                         .buttonStyle(.plain)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 8)
@@ -166,28 +167,6 @@ struct ContentView: View {
                 step: 50
             )
             .disabled(!store.helperInstalled && store.mode != .auto)
-        }
-    }
-
-    private var languageSettings: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(AppLanguage.localized("Язык"))
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
-            Picker(AppLanguage.localized("Язык"), selection: Binding(
-                get: { selectedLanguage },
-                set: { newValue in
-                    selectedLanguage = newValue
-                    if let language = AppLanguage(rawValue: newValue) {
-                        AppLanguage.apply(language)
-                    }
-                }
-            )) {
-                ForEach(AppLanguage.allCases, id: \ .id) { language in
-                    Text(language.displayName).tag(language.rawValue)
-                }
-            }
-            .pickerStyle(.segmented)
         }
     }
 

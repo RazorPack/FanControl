@@ -11,7 +11,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .system: return "System"
+        case .system: return Self.localized("Как в macOS")
         case .en: return "English"
         case .ru: return "Русский"
         case .be: return "Беларуская"
@@ -27,28 +27,14 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         }
     }
 
-    var bundle: Bundle {
-        let languageCode = self == .system ? Locale.preferredLanguages.first ?? "en" : self.localeIdentifier
-        if self == .system {
-            return Bundle.main
-        }
-        let path = Bundle.main.path(forResource: languageCode, ofType: "lproj")
-        return path.flatMap(Bundle.init(path:)) ?? Bundle.main
-    }
-
     static var current: AppLanguage {
         let rawValue = UserDefaults.standard.string(forKey: "appLanguage") ?? "system"
         return AppLanguage(rawValue: rawValue) ?? .system
     }
 
     static func apply(_ language: AppLanguage) {
+        UserDefaults.standard.removeObject(forKey: "AppleLanguages")
         UserDefaults.standard.set(language.rawValue, forKey: "appLanguage")
-        if language == .system {
-            UserDefaults.standard.removeObject(forKey: "AppleLanguages")
-        } else {
-            UserDefaults.standard.set([language.localeIdentifier], forKey: "AppleLanguages")
-        }
-        UserDefaults.standard.synchronize()
     }
 
     static func localized(_ key: String, fallback: String? = nil) -> String {
