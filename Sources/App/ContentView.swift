@@ -21,7 +21,7 @@ struct ContentView: View {
     private var header: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("FanControl")
+                Text("MacFanControl")
                     .font(.title2.weight(.semibold))
                 Text(machineLine)
                     .font(.caption)

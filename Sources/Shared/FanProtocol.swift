@@ -1,7 +1,7 @@
 import Darwin
 import Foundation
 
-enum FanControlCommand: String, Codable {
+enum MacFanControlCommand: String, Codable {
     case ping
     case status
     case set
@@ -9,7 +9,7 @@ enum FanControlCommand: String, Codable {
 }
 
 struct FanRequest: Codable {
-    var cmd: FanControlCommand
+    var cmd: MacFanControlCommand
     var rpm: Double?
 }
 
@@ -57,10 +57,10 @@ struct FanSnapshot: Codable, Equatable {
 }
 
 enum FanHardware {
-    static let socketPath = "/var/run/fancontrol.sock"
-    static let helperLabel = "ru.fancontrol.helper"
-    static let helperInstallPath = "/Library/PrivilegedHelperTools/ru.fancontrol.helper"
-    static let launchdPath = "/Library/LaunchDaemons/ru.fancontrol.helper.plist"
+    static let socketPath = "/var/run/macfancontrol.sock"
+    static let helperLabel = "ru.macfancontrol.helper"
+    static let helperInstallPath = "/Library/PrivilegedHelperTools/ru.macfancontrol.helper"
+    static let launchdPath = "/Library/LaunchDaemons/ru.macfancontrol.helper.plist"
     static let criticalCPU: Double = 95
     static let leaseSeconds: TimeInterval = 20
 

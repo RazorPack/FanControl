@@ -212,7 +212,7 @@ final class FanStore: ObservableObject {
     }
 
     @discardableResult
-    private func send(_ command: FanControlCommand, rpm: Double? = nil) -> FanSnapshot? {
+    private func send(_ command: MacFanControlCommand, rpm: Double? = nil) -> FanSnapshot? {
         let request = FanRequest(cmd: command, rpm: rpm)
         guard let payload = try? JSONEncoder().encode(request) else { return nil }
         var wire = payload
@@ -249,9 +249,9 @@ final class FanStore: ObservableObject {
 
 enum HelperInstaller {
     static func install() -> Result<Void, Error> {
-        let helperSrc = Bundle.main.bundlePath + "/Contents/Helpers/fancontrol-helper"
+        let helperSrc = Bundle.main.bundlePath + "/Contents/Helpers/macfancontrol-helper"
         guard FileManager.default.isExecutableFile(atPath: helperSrc) else {
-            return .failure(NSError(domain: "FanControl", code: 1, userInfo: [
+            return .failure(NSError(domain: "MacFanControl", code: 1, userInfo: [
                 NSLocalizedDescriptionKey: String(localized: "The helper executable was not found in the app.")
             ]))
         }
@@ -260,6 +260,13 @@ enum HelperInstaller {
         #!/bin/bash
         set -euo pipefail
         mkdir -p /Library/PrivilegedHelperTools
+        if [ -S /var/run/fancontrol.sock ]; then
+            printf '{"cmd":"auto"}\\n' | /usr/bin/nc -U /var/run/fancontrol.sock || true
+        fi
+        launchctl bootout system/ru.fancontrol.helper 2>/dev/null || true
+        rm -f /var/run/fancontrol.sock
+        rm -f /Library/LaunchDaemons/ru.fancontrol.helper.plist
+        rm -f /Library/PrivilegedHelperTools/ru.fancontrol.helper
         cp '\(helperSrc)' '\(FanHardware.helperInstallPath)'
         chown root:wheel '\(FanHardware.helperInstallPath)'
         chmod 755 '\(FanHardware.helperInstallPath)'
@@ -289,7 +296,7 @@ enum HelperInstaller {
         launchctl kickstart -k system/\(FanHardware.helperLabel)
         """
 
-        let scriptURL = FileManager.default.temporaryDirectory.appendingPathComponent("install-fancontrol.sh")
+        let scriptURL = FileManager.default.temporaryDirectory.appendingPathComponent("install-macfancontrol.sh")
         do {
             try script.write(to: scriptURL, atomically: true, encoding: .utf8)
             try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: scriptURL.path)
@@ -309,7 +316,7 @@ enum HelperInstaller {
                 return .success(())
             }
             let message = String(data: err.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? String(localized: "Installation error")
-            return .failure(NSError(domain: "FanControl", code: Int(process.terminationStatus), userInfo: [
+            return .failure(NSError(domain: "MacFanControl", code: Int(process.terminationStatus), userInfo: [
                 NSLocalizedDescriptionKey: message
             ]))
         } catch {

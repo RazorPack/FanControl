@@ -5,9 +5,9 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>en</string>
     <key>CFBundleExecutable</key>
-    <string>FanControl</string>
+    <string>MacFanControl</string>
     <key>CFBundleIconFile</key>
-    <string>AppIcon.icns</string>
+    <string>MacFanControl.icns</string>
     <key>CFBundleLocalizations</key>
     <array>
         <string>en</string>
@@ -15,11 +15,11 @@
         <string>ru</string>
     </array>
     <key>CFBundleIdentifier</key>
-    <string>ru.fancontrol.app</string>
+    <string>ru.macfancontrol.app</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>FanControl</string>
+    <string>MacFanControl</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>

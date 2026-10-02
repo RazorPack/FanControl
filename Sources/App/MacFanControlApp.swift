@@ -2,12 +2,12 @@ import AppKit
 import SwiftUI
 
 @main
-struct FanControlApp: App {
+struct MacFanControlApp: App {
     @StateObject private var store = FanStore()
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     var body: some Scene {
-        Window("FanControl", id: "main") {
+        Window("MacFanControl", id: "main") {
             ContentView()
                 .environmentObject(store)
                 .onAppear {
@@ -54,9 +54,9 @@ struct FanControlApp: App {
                 Button("Нагрузка") { store.select(.performance) }
                 Button("Максимум") { store.select(.full) }
                 Divider()
-                Button("Открыть FanControl") {
+                Button("Открыть MacFanControl") {
                     NSApp.activate(ignoringOtherApps: true)
-                    if let window = NSApp.windows.first(where: { $0.identifier?.rawValue == "main" || $0.title == "FanControl" }) {
+                    if let window = NSApp.windows.first(where: { $0.identifier?.rawValue == "main" || $0.title == "MacFanControl" }) {
                         window.makeKeyAndOrderFront(nil)
                     }
                 }

@@ -15,24 +15,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build app
-        run: make
+        run: make dmg
       - name: Validate app bundle
         run: |
-          test -x dist/FanControl.app/Contents/MacOS/FanControl
-          test -x dist/FanControl.app/Contents/Helpers/fancontrol-helper
-          plutil -lint dist/FanControl.app/Contents/Info.plist
-          codesign --verify --deep --strict dist/FanControl.app
+          test -x dist/MacFanControl.app/Contents/MacOS/MacFanControl
+          test -x dist/MacFanControl.app/Contents/Helpers/macfancontrol-helper
+          plutil -lint dist/MacFanControl.app/Contents/Info.plist
+          codesign --verify --deep --strict dist/MacFanControl.app
       - name: Package app
-        run: ditto -c -k --sequesterRsrc --keepParent dist/FanControl.app FanControl-macos-arm64.zip
+        run: ditto -c -k --sequesterRsrc --keepParent dist/MacFanControl.app dist/MacFanControl-macos-arm64.zip
       - name: Publish GitHub release
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" FanControl-macos-arm64.zip --generate-notes
+        run: gh release create "$GITHUB_REF_NAME" dist/MacFanControl-macos-arm64.zip dist/MacFanControl-macos-arm64.dmg --generate-notes
       - uses: actions/upload-artifact@v4
         if: startsWith(github.ref, 'refs/heads/')
         with:
-          name: FanControl-macos-arm64
-          path: FanControl-macos-arm64.zip
+          name: MacFanControl-macos-arm64
+          path: |
+            dist/MacFanControl-macos-arm64.zip
+            dist/MacFanControl-macos-arm64.dmg
           if-no-files-found: error
           retention-days: 14

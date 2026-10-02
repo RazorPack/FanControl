@@ -4,17 +4,17 @@ import Foundation
 /// Privileged daemon: writes SMC fan keys as root and restores automatic
 /// control if the GUI disappears (lease timeout).
 @main
-enum FanControlHelper {
+enum MacFanControlHelper {
     static let smc = SMCClient()
     static var lastLease = Date()
     static var holdingManual = false
     static var desiredRPM: Double?
     static var temperatureKeys: [String] = []
-    static let queue = DispatchQueue(label: "ru.fancontrol.helper")
+    static let queue = DispatchQueue(label: "ru.macfancontrol.helper")
 
     static func main() {
         guard geteuid() == 0 else {
-            FileHandle.standardError.write(Data("fancontrol-helper must run as root\n".utf8))
+            FileHandle.standardError.write(Data("macfancontrol-helper must run as root\n".utf8))
             exit(1)
         }
         guard smc.open() else {

@@ -18,7 +18,7 @@
 
 ```bash
 make
-open dist/FanControl.app
+open dist/MacFanControl.app
 # или установите в папку программ:
 make install   # скопирует в ~/Applications и сразу запустит
 
@@ -31,9 +31,9 @@ make install   # скопирует в ~/Applications и сразу запуст
 Если захотите удалить системный хелпер:
 
 ```bash
-sudo launchctl bootout system/ru.fancontrol.helper
-sudo rm -f /Library/LaunchDaemons/ru.fancontrol.helper.plist
-sudo rm -f /Library/PrivilegedHelperTools/ru.fancontrol.helper
+sudo launchctl bootout system/ru.macfancontrol.helper
+sudo rm -f /Library/LaunchDaemons/ru.macfancontrol.helper.plist
+sudo rm -f /Library/PrivilegedHelperTools/ru.macfancontrol.helper
 
 ```
 
