@@ -39,6 +39,11 @@
 "Язык применяется сразу ко всему интерфейсу." = "The language applies immediately throughout the interface.";
 "Как в macOS" = "Use macOS language";
 "Автоматически" = "Automatic";
+"Запускать в свернутом режиме" = "Launch minimized";
+"При запуске главное окно будет скрыто; приложение останется доступно в строке меню." = "The main window will be hidden on launch; the app will remain available in the menu bar.";
+"Запускать при входе в систему" = "Launch at login";
+"Открыть настройки объектов входа" = "Open Login Items settings";
+"Не удалось определить приложение для автозапуска." = "Could not identify the app for launch at login.";
 "Выйти" = "Quit";
 "A background service with administrator privileges is required." = "A background service with administrator privileges is required.";
 "Could not communicate with the background service." = "Could not communicate with the background service.";

@@ -18,7 +18,7 @@ struct MacFanControlApp: App {
                 .onAppear {
                     store.start()
                     appDelegate.store = store
-                    appDelegate.attachMainWindow()
+                    appDelegate.configureMainWindow(launchMinimized: UserDefaults.standard.bool(forKey: "launchMinimized"))
                 }
                 .onChange(of: selectedLanguage) { _, newValue in
                     if let language = AppLanguage(rawValue: newValue) {
@@ -66,7 +66,7 @@ struct MacFanControlApp: App {
                 Button(AppLanguage.localized("Максимум")) { store.select(.full) }
                 Divider()
                 Button(AppLanguage.localized("Свернуть в строку меню")) {
-                    NSApp.hide(nil)
+                    appDelegate.hideMainWindow()
                 }
                 Button(AppLanguage.localized("Открыть MacFanControl")) {
                     appDelegate.showMainWindow()
@@ -92,24 +92,42 @@ struct MacFanControlApp: App {
 
 final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var store: FanStore?
+    private var didConfigureMainWindow = false
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         false
     }
 
-    func attachMainWindow() {
+    func configureMainWindow(launchMinimized: Bool) {
+        guard !didConfigureMainWindow else { return }
+        didConfigureMainWindow = true
         DispatchQueue.main.async { [weak self] in
-            self?.mainWindow?.delegate = self
+            guard let self else { return }
+            self.mainWindow?.delegate = self
+            if launchMinimized {
+                self.hideMainWindow()
+            }
         }
     }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {
         guard isMainWindow(sender) else { return true }
-        NSApp.hide(nil)
+        hideMainWindow()
         return false
     }
 
+    func windowWillMiniaturize(_ notification: Notification) {
+        guard let window = notification.object as? NSWindow, isMainWindow(window) else { return }
+        hideMainWindow()
+    }
+
+    func hideMainWindow() {
+        NSApp.setActivationPolicy(.accessory)
+        NSApp.hide(nil)
+    }
+
     func showMainWindow() {
+        NSApp.setActivationPolicy(.regular)
         NSApp.unhide(nil)
         NSApp.activate(ignoringOtherApps: true)
         mainWindow?.makeKeyAndOrderFront(nil)
