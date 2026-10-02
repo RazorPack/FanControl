@@ -33,8 +33,8 @@ struct ContentView: View {
     }
 
     private var machineLine: String {
-        let model = store.snapshot.model.isEmpty ? "Mac" : store.snapshot.model
-        let chip = store.snapshot.chip.isEmpty ? "Apple Silicon" : store.snapshot.chip
+        let model = store.snapshot.model.isEmpty ? String(localized: "Mac") : store.snapshot.model
+        let chip = store.snapshot.chip.isEmpty ? String(localized: "Apple Silicon") : store.snapshot.chip
         return "\(chip) · \(model)"
     }
 
@@ -65,7 +65,7 @@ struct ContentView: View {
                     Text("\(store.snapshot.displayRPM)")
                         .font(.system(size: 36, weight: .semibold, design: .rounded))
                         .monospacedDigit()
-                    Text("об/мин")
+                    Text("RPM")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -82,7 +82,7 @@ struct ContentView: View {
         }
     }
 
-    private func metric(_ title: String, _ value: String) -> some View {
+    private func metric(_ title: LocalizedStringKey, _ value: LocalizedStringKey) -> some View {
         VStack(alignment: .leading, spacing: 1) {
             Text(title)
                 .font(.caption2)
@@ -93,7 +93,7 @@ struct ContentView: View {
         }
     }
 
-    private var thermalLabel: String {
+    private var thermalLabel: LocalizedStringKey {
         switch ProcessInfo.processInfo.thermalState {
         case .nominal: return "норма"
         case .fair: return "тепло"
@@ -103,7 +103,7 @@ struct ContentView: View {
         }
     }
 
-    private func modeLabel(_ mode: Int) -> String {
+    private func modeLabel(_ mode: Int) -> LocalizedStringKey {
         switch mode {
         case 0: return "авто (0)"
         case 1: return "ручной (1)"
@@ -143,8 +143,12 @@ struct ContentView: View {
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
                 Spacer()
-                Text("\(Int(store.customRPM.rounded())) об/мин")
-                    .font(.caption.monospacedDigit())
+                HStack(spacing: 4) {
+                    Text("\(Int(store.customRPM.rounded()))")
+                        .font(.caption.monospacedDigit())
+                    Text("RPM")
+                        .font(.caption)
+                }
             }
             Slider(
                 value: Binding(

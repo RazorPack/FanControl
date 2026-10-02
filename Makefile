@@ -27,6 +27,7 @@ app: helper icon
 		-o $(APP)/Contents/MacOS/FanControl
 	cp Resources/Info.plist $(APP)/Contents/Info.plist
 	cp build/AppIcon.icns $(APP)/Contents/Resources/AppIcon.icns
+	cp -R Resources/*.lproj $(APP)/Contents/Resources/
 	echo 'APPL????' > $(APP)/Contents/PkgInfo
 	cp build/fancontrol-helper $(APP)/Contents/Helpers/fancontrol-helper
 	chmod 755 $(APP)/Contents/MacOS/FanControl $(APP)/Contents/Helpers/fancontrol-helper

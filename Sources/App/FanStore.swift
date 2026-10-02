@@ -14,7 +14,7 @@ enum ControlMode: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var title: String {
+    var title: LocalizedStringKey {
         switch self {
         case .auto: return "Авто"
         case .quiet: return "Тихий"
@@ -44,7 +44,7 @@ final class FanStore: ObservableObject {
     @Published var customRPM: Double = 2000
     @Published var helperInstalled = false
     @Published var helperError: String?
-    @Published var lastApplied: String = "система"
+    @Published var lastApplied: String = String(localized: "System")
     @Published var installing = false
 
     private let smc = SMCClient()
@@ -150,11 +150,11 @@ final class FanStore: ObservableObject {
     private func apply() {
         guard mode != .auto else {
             if helperInstalled { _ = send(.auto) }
-            lastApplied = "система"
+            lastApplied = String(localized: "System")
             return
         }
         guard helperInstalled else {
-            helperError = "Нужен фоновый сервис с правами администратора."
+            helperError = String(localized: "A background service with administrator privileges is required.")
             return
         }
         let rpm: Double
@@ -168,10 +168,10 @@ final class FanStore: ObservableObject {
             )
         }
         if send(.set, rpm: rpm) != nil {
-            lastApplied = "\(Int(rpm.rounded())) об/мин"
+            lastApplied = String(format: NSLocalizedString("%d RPM", comment: "Fan speed"), Int(rpm.rounded()))
             helperError = nil
         } else {
-            helperError = "Не удалось связаться с фоновым сервисом."
+            helperError = String(localized: "Could not communicate with the background service.")
         }
     }
 
@@ -252,7 +252,7 @@ enum HelperInstaller {
         let helperSrc = Bundle.main.bundlePath + "/Contents/Helpers/fancontrol-helper"
         guard FileManager.default.isExecutableFile(atPath: helperSrc) else {
             return .failure(NSError(domain: "FanControl", code: 1, userInfo: [
-                NSLocalizedDescriptionKey: "Бинарник helper не найден в приложении."
+                NSLocalizedDescriptionKey: String(localized: "The helper executable was not found in the app.")
             ]))
         }
 
@@ -308,7 +308,7 @@ enum HelperInstaller {
             if process.terminationStatus == 0 {
                 return .success(())
             }
-            let message = String(data: err.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? "ошибка установки"
+            let message = String(data: err.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? String(localized: "Installation error")
             return .failure(NSError(domain: "FanControl", code: Int(process.terminationStatus), userInfo: [
                 NSLocalizedDescriptionKey: message
             ]))

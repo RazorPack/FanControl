@@ -33,10 +33,17 @@ struct FanControlApp: App {
 
         MenuBarExtra {
             VStack(alignment: .leading, spacing: 8) {
-                Text("\(store.snapshot.displayRPM) об/мин")
-                    .font(.headline.monospacedDigit())
+                HStack(spacing: 4) {
+                    Text("\(store.snapshot.displayRPM)")
+                        .font(.headline.monospacedDigit())
+                    Text("RPM")
+                        .font(.headline)
+                }
                 if let cpu = store.snapshot.cpuTemp {
-                    Text(String(format: "CPU %.0f°C", cpu))
+                    HStack(spacing: 4) {
+                        Text("CPU")
+                        Text(String(format: "%.0f°C", cpu))
+                    }
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
