@@ -5,7 +5,7 @@ APP     := dist/FanControl.app
 SHARED  := Sources/Shared/SMCClient.swift Sources/Shared/FanProtocol.swift
 CFLAGS  := -O -parse-as-library -target $(TARGET) -sdk $(SDK) -strict-concurrency=minimal
 
-.PHONY: all app helper run install clean
+.PHONY: all app helper icon run install clean
 
 all: app
 
@@ -15,12 +15,18 @@ helper:
 		$(SHARED) Sources/Helper/main.swift \
 		-o build/fancontrol-helper
 
-app: helper
+icon:
+	mkdir -p build
+	swift Resources/GenerateAppIcon.swift build/FanControl.iconset
+	iconutil -c icns build/FanControl.iconset -o build/AppIcon.icns
+
+app: helper icon
 	mkdir -p $(APP)/Contents/MacOS $(APP)/Contents/Helpers $(APP)/Contents/Resources
 	$(SWIFTC) $(CFLAGS) -framework SwiftUI -framework AppKit -framework IOKit -framework Foundation \
 		$(SHARED) Sources/App/FanControlApp.swift Sources/App/FanStore.swift Sources/App/ContentView.swift \
 		-o $(APP)/Contents/MacOS/FanControl
 	cp Resources/Info.plist $(APP)/Contents/Info.plist
+	cp build/AppIcon.icns $(APP)/Contents/Resources/AppIcon.icns
 	echo 'APPL????' > $(APP)/Contents/PkgInfo
 	cp build/fancontrol-helper $(APP)/Contents/Helpers/fancontrol-helper
 	chmod 755 $(APP)/Contents/MacOS/FanControl $(APP)/Contents/Helpers/fancontrol-helper

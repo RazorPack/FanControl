@@ -6,6 +6,8 @@
     <string>ru</string>
     <key>CFBundleExecutable</key>
     <string>FanControl</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon.icns</string>
     <key>CFBundleIdentifier</key>
     <string>ru.fancontrol.app</string>
     <key>CFBundleInfoDictionaryVersion</key>
