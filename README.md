@@ -1,40 +1,51 @@
 # MacFanControl
 
-Нативное SwiftUI-приложение для **Mac mini M4** (протестировано на `Mac16,10`, macOS 27). Отображает температуры, текущие обороты и позволяет регулировать скорость вентилятора вручную.
+[English](README.md) | [Русский](README.ru.md) | [Беларуская](README.be.md)
 
-Так как Apple не предоставляет публичного API для управления кулером, чтение SMC происходит без привилегий, а запись настроек выполняется через компактный фоновый сервис (`LaunchDaemon`) с правами root.
+A native SwiftUI utility for **Mac mini M4**, tested on `Mac16,10` with macOS 27. It monitors temperatures and fan speed, and lets you control the fan manually.
 
-## Что умеет
+Apple does not provide a public API for fan control. Sensor readings use SMC without elevated privileges; writing fan settings is handled by a small background `LaunchDaemon` running as root.
 
-* **Мониторинг кулера в реальном времени** (в M4 mini один вентилятор, рабочий диапазон — примерно 1000–4900 об/мин).
-* **Отслеживание температур:** CPU, GPU, NAND-памяти и Wi-Fi модуля.
-* **Гибкие режимы:** Авто, Тихий, Баланс, Производительный, Максимум, а также ручной слайдер.
-* **Защита и безопасность:** macOS автоматически возвращает контроль над кулером при выходе из программы, переходе в сон или сбое приложения (через ~20 секунд).
-* **Аварийный охлад:** если процессор греется до 95 °C и выше, тихий режим автоматически сбрасывается для предотвращения перегрева.
+## Features
 
-## Как собрать и запустить
+- Real-time fan monitoring. Mac mini M4 has one fan, with an approximate operating range of 1,000–4,900 RPM.
+- CPU, GPU, NAND, and Wi-Fi temperature readings.
+- Auto, Quiet, Balanced, Performance, and Maximum profiles, plus a custom speed slider.
+- Automatic return to macOS fan control when the app exits or the Mac sleeps. If the app crashes, the helper's lease expires after about 20 seconds.
+- Thermal safety: at CPU temperatures of 95 °C or higher, Quiet mode is raised to Performance.
 
-Убедитесь, что установлены Xcode Command Line Tools, затем выполните в терминале:
+## Build and install
+
+Building requires a Mac with Xcode Command Line Tools. From the repository directory, run:
 
 ```bash
 make
 open dist/MacFanControl.app
-# или установите в папку программ:
-make install   # скопирует в ~/Applications и сразу запустит
-
 ```
 
-При первом запуске нажмите **«Разрешить управление вентилятором»** и введите пароль администратора. Это нужно для активации сервиса, который записывает параметры `F0Md` / `F0Tg` в SMC.
+To create a compressed disk image:
 
-## Как полностью удалить фоновый сервис
+```bash
+make dmg
+```
 
-Если захотите удалить системный хелпер:
+The image is written to `dist/MacFanControl-macos-arm64.dmg`. Alternatively, install the app in `~/Applications` and launch it with:
+
+```bash
+make install
+```
+
+On first launch, choose **Allow fan control** and enter an administrator password. This installs the helper that writes the `F0Md` and `F0Tg` values to the SMC.
+
+## Remove the background helper
+
+To remove the system helper and its files:
 
 ```bash
 sudo launchctl bootout system/ru.macfancontrol.helper
 sudo rm -f /Library/LaunchDaemons/ru.macfancontrol.helper.plist
 sudo rm -f /Library/PrivilegedHelperTools/ru.macfancontrol.helper
-
+sudo rm -f /var/run/macfancontrol.sock
 ```
 
-> **Важно:** Ручная регулировка меняет стандартное поведение системы охлаждения macOS. Не оставляйте минимальные обороты при высокой нагрузке и не пытайтесь обойти аппаратные ограничения прошивки.
+> **Safety:** Manual fan control changes the default macOS cooling behavior. Do not leave the fan at minimum speed under heavy load or attempt to bypass firmware limits.
